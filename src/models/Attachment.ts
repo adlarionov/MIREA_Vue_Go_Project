@@ -3,6 +3,10 @@ export default interface Attachment {
   filename: string
 }
 
+export interface NewFile {
+  file_id: string
+}
+
 export interface AttachmentRequestDto {
   download_url: string
   filename: string

@@ -19,7 +19,7 @@ defineProps<{ requests: Request[] }>()
     </Column>
     <Column field="author.name" header="Автор" />
     <Column field="event" header="Мероприятие" />
-    <Column field="createdAt" header="Создана" />
+    <Column field="created_at" header="Создана" />
   </DataTable>
 </template>
 

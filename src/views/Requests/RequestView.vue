@@ -1,8 +1,34 @@
 <script setup lang="ts">
 import Textarea from 'primevue/textarea'
 import Header from '@/components/Header.vue'
-import { Button, Tag } from 'primevue'
+import { Button, Tag, useToast } from 'primevue'
 import File from '@/assets/file-icon.png'
+import { ref, onMounted } from 'vue'
+import RequestsController from '@/controllers/requestsController'
+import { useRoute, useRouter } from 'vue-router'
+import type { RequestDto } from '@/models/Request'
+
+const route = useRoute()
+
+const router = useRouter()
+const toast = useToast()
+
+const data = ref<RequestDto>()
+
+onMounted(async () => {
+  try {
+    if (!Array.isArray(route.params.request_id))
+      data.value = await RequestsController.getRequestById(route.params.request_id)
+  } catch {
+    toast.add({
+      severity: 'error',
+      closable: false,
+      summary: 'Такой заявки не существует',
+      life: 3000,
+    })
+    router.push('/')
+  }
+})
 </script>
 <template>
   <div>

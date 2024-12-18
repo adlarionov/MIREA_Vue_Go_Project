@@ -1,6 +1,15 @@
 <script setup lang="ts">
+import AuthApi from '@/api/AuthApi'
 import Header from '@/components/Header.vue'
 import Button from 'primevue/button'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const handleLogout = () => {
+  AuthApi.logout()
+  router.push('/auth')
+}
 </script>
 <template>
   <Header title="Заявки">
@@ -11,7 +20,7 @@ import Button from 'primevue/button'
         variant="outlined"
         severity="secondary"
       />
-      <Button label="Выйти" @click="$router.push('/auth')" severity="danger" />
+      <Button label="Выйти" @click="handleLogout" severity="danger" />
     </template>
   </Header>
 </template>

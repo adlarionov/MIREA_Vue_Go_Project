@@ -21,6 +21,10 @@ export interface RequestDto {
   updated_at: string
 }
 
+export interface NewRequestComment {
+  content: string
+}
+
 export interface RequestComment {
   content: string
   author: User

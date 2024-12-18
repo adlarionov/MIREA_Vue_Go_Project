@@ -15,7 +15,7 @@ const router = createRouter({
       component: MainView,
     },
     {
-      path: '/requests/:id',
+      path: '/requests/:request_id',
       name: 'request',
       component: RequestView,
     },
