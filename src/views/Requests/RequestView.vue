@@ -3,14 +3,15 @@ import Textarea from 'primevue/textarea'
 import Header from '@/components/Header.vue'
 import { Button, Tag, useToast } from 'primevue'
 import File from '@/assets/file-icon.png'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import RequestsController from '@/controllers/requestsController'
 import { useRoute, useRouter } from 'vue-router'
 import type { RequestDto } from '@/models/Request'
+import { AxiosError } from 'axios'
 
 const route = useRoute()
-
 const router = useRouter()
+
 const toast = useToast()
 
 const parseDate = (inputDate?: string) => {
@@ -31,9 +32,24 @@ onMounted(async () => {
       summary: 'Такой заявки не существует',
       life: 3000,
     })
-    // router.push('/')
+    router.push('/')
   }
 })
+
+const handleAddNewComment = async () => {
+  try {
+  } catch (e) {
+    if (e instanceof AxiosError) {
+      toast.add({
+        severity: 'error',
+        closable: false,
+        summary: e.message,
+        life: 3000,
+      })
+    }
+    return
+  }
+}
 </script>
 <template>
   <div>
@@ -78,7 +94,7 @@ onMounted(async () => {
       <div class="request-comments-description">
         <p>{{ parseDate(data?.comments.pop()?.created_id) }}</p>
         <h4>{{ data?.comments.pop()?.author }}</h4>
-        <Button label="Новый комментарий" />
+        <Button @click="handleAddNewComment" label="Новый комментарий" />
       </div>
     </div>
   </div>

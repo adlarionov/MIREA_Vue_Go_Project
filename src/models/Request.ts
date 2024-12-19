@@ -33,7 +33,7 @@ export interface RequestComment {
 
 export interface NewRequest {
   event_id: string
-  attachments: Attachment[]
+  attachments?: Attachment[]
   description?: string
   status?: string
 }

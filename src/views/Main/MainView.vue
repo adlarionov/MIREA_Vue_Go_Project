@@ -19,48 +19,54 @@ const toast = useToast()
 const requests = ref<Request[]>([])
 
 interface FilterFormItems {
-  event_name: string
-  author_login: string
-  created_after: string
+  event_name?: string
+  author_login?: string
+  created_after?: string
 }
 
 const handleSearchRequests = async (event: MouseEvent) => {
   event.preventDefault()
+
   if (!inputForm.value) return
 
   try {
     const filterForm = Array.from(inputForm.value.elements) as HTMLInputElement[]
 
     const payload: FilterFormItems = {
-      event_name: filterForm[0].value,
-      author_login: filterForm[1].value,
-      created_after: new Date(filterForm[2].value).toISOString(),
+      event_name: !!filterForm[0].value ? filterForm[0].value : undefined,
+      author_login: !!filterForm[1].value ? filterForm[1].value : undefined,
+      created_after: !!filterForm[2].value
+        ? new Date(filterForm[2].value).toISOString()
+        : undefined,
     }
-
-    console.log(payload)
 
     let event_id = undefined
     if (payload.event_name) {
       const commonEvent = await EventsController.getEvents(payload.event_name)
-      event_id = commonEvent[0].event_id
+      event_id = !!commonEvent.length ? commonEvent[0].id : ''
     }
 
-    requests.value = await RequestsController.getRequests(
+    const response = await RequestsController.getRequests(
       undefined,
       event_id,
       payload.author_login,
       payload.created_after,
     )
+
+    requests.value = response
+
+    console.log(response)
   } catch (e) {
     if (e instanceof AxiosError) {
-      if (e.status === 404)
+      if (e.status === 404) {
         toast.add({
           severity: 'info',
           closable: false,
           summary: 'Нет заявок по заданным фильтрам',
           life: 1500,
         })
-      else
+        requests.value = []
+      } else
         toast.add({
           severity: 'error',
           closable: false,
@@ -74,7 +80,10 @@ const handleSearchRequests = async (event: MouseEvent) => {
 
 onMounted(async () => {
   try {
-    requests.value = await RequestsController.getRequests()
+    const requestsResponse = await RequestsController.getRequests()
+    // requestsResponse.forEach(async (request) => await EventsController.getEventById(request.event);)
+    // const eventResponse =
+    requests.value = requestsResponse
   } catch {
     toast.add({
       severity: 'error',

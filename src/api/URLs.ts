@@ -10,11 +10,11 @@ const URLs = {
     author_login?: string,
     created_after?: string,
   ) => {
-    let url = '/v3/requests'
-    if (request_id) url += `?request_id=${request_id}`
-    if (event_id) url += `&event_id=${event_id}`
-    if (author_login) url += `&author_login=${author_login}`
-    if (created_after) url += `&created_after=${created_after}`
+    let url = '/v3/requests?'
+    if (request_id) url += `request_id=${request_id}&`
+    if (event_id) url += `event_id=${event_id}&`
+    if (author_login) url += `&author_login=${author_login}&`
+    if (created_after) url += `&created_after=${created_after}&`
 
     return url
   },

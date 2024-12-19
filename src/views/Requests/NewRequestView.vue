@@ -19,6 +19,7 @@ import type { Event } from '@/models/Event'
 import { AxiosError } from 'axios'
 import { useRouter } from 'vue-router'
 import FilesController from '@/controllers/filesController'
+import RequestsController from '@/controllers/requestsController'
 
 const toast = useToast()
 const router = useRouter()
@@ -38,19 +39,21 @@ const handleFileLoad = async (e: FileUploadSelectEvent) => {
     life: 1400,
   })
 
-  const files = e.files as FileType
+  const files = e.files as FileType[]
+
+  console.log(files)
 
   // const files = new Blob()
-  if (!files.size) {
+  if (!files.length) {
     fileInput.value = []
     return
   }
 
-  console.log(files)
+  return
 
-  const response = await FilesController.loadFile(files)
+  // const response = await FilesController.loadFile()
 
-  console.log(response)
+  // console.log(response)
 
   // fileInput.value = e.files
 }
@@ -65,18 +68,39 @@ const resolver = ({ values }: FormResolverOptions) => {
   }
 }
 
-const onFormSubmit = ({ valid, states }: FormSubmitEvent) => {
+const onFormSubmit = async ({ valid, states, reset }: FormSubmitEvent) => {
   if (valid) {
-    const result = parseFormResult<NewRequest>(states)
-    // const files = fileInput.value
+    try {
+      const result = parseFormResult<NewRequest>(states)
+      // const files = fileInput.value
 
-    console.log({ ...result })
+      console.log('!test')
 
-    toast.add({
-      severity: 'success',
-      summary: 'Заявка подана',
-      life: 3000,
-    })
+      const response = await RequestsController.createRequest({
+        ...result,
+        status: 'new',
+        attachments: [],
+      })
+
+      if (response) {
+        toast.add({
+          severity: 'success',
+          summary: 'Заявка подана',
+          life: 3000,
+        })
+        router.push('/')
+        reset()
+      }
+    } catch (e) {
+      if (e instanceof AxiosError) {
+        toast.add({
+          severity: 'error',
+          summary: e.message,
+          life: 3000,
+        })
+      }
+      return
+    }
   }
 }
 

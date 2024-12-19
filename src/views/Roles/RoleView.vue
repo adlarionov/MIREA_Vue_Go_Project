@@ -33,14 +33,13 @@ const onFormSubmit = async ({ valid, states }: FormSubmitEvent) => {
     const values = parseFormResult<NewRole>(states)
 
     try {
-      const response = await RolesController.updateRole(values)
-
-      if (response)
+      await RolesController.updateRole(values).then(() =>
         toast.add({
           severity: 'success',
           summary: 'Роль выдана',
           life: 3000,
-        })
+        }),
+      )
     } catch (e) {
       if (e instanceof AxiosError) {
         if (e.status === 403)
@@ -48,6 +47,13 @@ const onFormSubmit = async ({ valid, states }: FormSubmitEvent) => {
             severity: 'warn',
             closable: false,
             summary: 'Недостаточно прав',
+            life: 2000,
+          })
+        if (e.status === 404)
+          toast.add({
+            severity: 'warn',
+            closable: false,
+            summary: 'Такого пользователя нет',
             life: 2000,
           })
         else

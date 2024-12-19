@@ -18,8 +18,15 @@ defineProps<{ requests: Request[] }>()
       </template>
     </Column>
     <Column field="author.name" header="Автор" />
-    <Column field="event" header="Мероприятие" />
-    <Column field="created_at" header="Создана" />
+    <Column field="event.title" header="Мероприятие" />
+    <Column field="created_at" header="Создана">
+      <template #body="slotProps">
+        <span
+          >{{ new Date(slotProps.data.created_at).toLocaleDateString() }}
+          {{ new Date(slotProps.data.created_at).toLocaleTimeString() }}</span
+        >
+      </template>
+    </Column>
   </DataTable>
 </template>
 

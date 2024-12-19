@@ -1,7 +1,7 @@
 import type { FormError } from './Form'
 
 export interface Event {
-  event_id: string
+  id: string
   name: string
   description: string
 }
