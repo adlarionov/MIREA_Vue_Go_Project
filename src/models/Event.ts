@@ -1,11 +1,12 @@
 import type { FormError } from './Form'
 
 export interface Event {
+  event_id: string
   name: string
   description: string
 }
 
-export type NewEvent = Event
+export type NewEvent = Omit<Event, 'event_id'>
 
 export interface UpdatedEvent {
   event_id: string

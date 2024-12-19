@@ -9,6 +9,8 @@ import { InputText, Toast } from 'primevue'
 import { parseFormResult } from '@/shared/parseFormResult'
 import type { NewEvent, NewEventError } from '@/models/Event'
 import Header from '@/components/Header.vue'
+import EventsController from '@/controllers/eventsController'
+import { AxiosError } from 'axios'
 
 const toast = useToast()
 
@@ -28,17 +30,32 @@ const resolver = ({ values }: FormResolverOptions) => {
   }
 }
 
-const onFormSubmit = ({ valid, states }: FormSubmitEvent) => {
+const onFormSubmit = async ({ valid, states, reset }: FormSubmitEvent) => {
   if (valid) {
     const values = parseFormResult<NewEvent>(states)
 
-    console.log(values)
+    try {
+      const response = await EventsController.createEvent(values)
 
-    toast.add({
-      severity: 'success',
-      summary: 'Заявка подана.',
-      life: 3000,
-    })
+      if (response)
+        toast.add({
+          severity: 'success',
+          summary: 'Мероприятие успешно создано',
+          life: 3000,
+        })
+
+      reset()
+    } catch (e) {
+      if (e instanceof AxiosError) {
+        toast.add({
+          severity: 'error',
+          life: 3000,
+          summary: e.message,
+          closable: false,
+        })
+      }
+      return
+    }
   }
 }
 </script>

@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import BackButton from '@/components/BackButton.vue'
+import RolesController from '@/controllers/rolesController'
 import { Role, type NewRole, type NewRoleErrors } from '@/models/Role'
 import { parseFormResult } from '@/shared/parseFormResult'
 import { Form, type FormResolverOptions, type FormSubmitEvent } from '@primevue/forms'
+import { AxiosError } from 'axios'
 import { Button, InputText, useToast, Select, Message, Toast } from 'primevue'
 import { reactive } from 'vue'
 
@@ -26,16 +28,38 @@ const resolver = ({ values }: FormResolverOptions) => {
   }
 }
 
-const onFormSubmit = ({ valid, states }: FormSubmitEvent) => {
-  console.log(valid)
+const onFormSubmit = async ({ valid, states }: FormSubmitEvent) => {
   if (valid) {
-    toast.add({
-      severity: 'success',
-      summary: 'Роль выдана.',
-      life: 3000,
-    })
+    const values = parseFormResult<NewRole>(states)
 
-    console.log(parseFormResult<NewRole>(states))
+    try {
+      const response = await RolesController.updateRole(values)
+
+      if (response)
+        toast.add({
+          severity: 'success',
+          summary: 'Роль выдана',
+          life: 3000,
+        })
+    } catch (e) {
+      if (e instanceof AxiosError) {
+        if (e.status === 403)
+          toast.add({
+            severity: 'warn',
+            closable: false,
+            summary: 'Недостаточно прав',
+            life: 2000,
+          })
+        else
+          toast.add({
+            severity: 'error',
+            closable: false,
+            summary: e.message,
+            life: 3000,
+          })
+      }
+      return
+    }
   }
 }
 </script>

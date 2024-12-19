@@ -13,6 +13,11 @@ const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 
+const parseDate = (inputDate?: string) => {
+  if (!inputDate) return ''
+  return `${new Date(inputDate).toLocaleDateString()} ${new Date(inputDate).toLocaleTimeString()}`
+}
+
 const data = ref<RequestDto>()
 
 onMounted(async () => {
@@ -26,7 +31,7 @@ onMounted(async () => {
       summary: 'Такой заявки не существует',
       life: 3000,
     })
-    router.push('/')
+    // router.push('/')
   }
 })
 </script>
@@ -35,35 +40,44 @@ onMounted(async () => {
     <Header back title="Заявка" />
     <div class="request-info">
       <div class="request-info-files">
-        <Textarea disabled style="resize: none" rows="8" />
+        <Textarea :value="data?.description" disabled style="resize: none" rows="8" />
         <div class="request-info-files-container">
-          <div class="file">
+          <div class="file" v-for="attachment in data?.attachments" :key="attachment.filename">
             <img width="60" :src="File" :alt="File" />
-            <span>file 1</span>
-          </div>
-          <div class="file">
-            <img width="60" :src="File" :alt="File" />
-            <span>file 1</span>
+            <span>{{ attachment.filename }}</span>
           </div>
         </div>
       </div>
       <div class="request-info-table">
-        <h4>id: <span style="margin-left: 8px"></span></h4>
-        <h4>Автор: <span style="margin-left: 8px"></span></h4>
-        <h4>Мероприятие: <span style="margin-left: 8px"></span></h4>
-        <h4>Создана: <span style="margin-left: 8px"></span></h4>
-        <h4>Обновлена: <span style="margin-left: 8px"></span></h4>
         <h4>
-          Статус: <Tag style="margin-left: 8px"><span>test</span></Tag>
+          id: <span style="margin-left: 8px">{{ route.params.request_id }}</span>
+        </h4>
+        <h4>
+          Автор: <span style="margin-left: 8px">{{ data?.user.name }}</span>
+        </h4>
+        <h4>
+          Мероприятие: <span style="margin-left: 8px">{{ data?.event_id }}</span>
+        </h4>
+        <h4>
+          Создана: <span style="margin-left: 8px">{{ parseDate(data?.created_at) }}</span>
+        </h4>
+        <h4>
+          Обновлена: <span style="margin-left: 8px">{{ parseDate(data?.updated_at) }}</span>
+        </h4>
+        <h4>
+          Статус:
+          <Tag style="margin-left: 8px"
+            ><span>{{ data?.status }}</span></Tag
+          >
         </h4>
       </div>
     </div>
     <div class="request-comments">
       <h3 class="request-comments-title">Комментарии</h3>
-      <Textarea rows="10" disabled style="resize: none" />
+      <Textarea :value="data?.comments.pop()?.content" rows="10" disabled style="resize: none" />
       <div class="request-comments-description">
-        <p>date</p>
-        <h4>author</h4>
+        <p>{{ parseDate(data?.comments.pop()?.created_id) }}</p>
+        <h4>{{ data?.comments.pop()?.author }}</h4>
         <Button label="Новый комментарий" />
       </div>
     </div>

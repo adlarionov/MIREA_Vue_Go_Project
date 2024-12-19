@@ -22,12 +22,12 @@ export default class RequestsController {
 
   static async getRequests(
     request_id?: string,
-    event_name?: string,
+    event_id?: string,
     author_login?: string,
     created_after?: string,
   ): Promise<Request[]> {
     try {
-      return RequestsApi.getRequests(request_id, author_login, created_after)
+      return RequestsApi.getRequests(request_id, event_id, author_login, created_after)
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
         throw {

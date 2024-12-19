@@ -5,7 +5,7 @@ import URLs from './URLs'
 export default class RequestsApi {
   static async createRequest(body: NewRequest): Promise<string> {
     const response = await API.post<{ request_id: string }>(URLs.createRequest, {
-      body,
+      ...body,
     })
 
     return response.data.request_id
@@ -32,7 +32,7 @@ export default class RequestsApi {
 
   static async addCommentToRequest(request_id: string, body: NewRequestComment): Promise<unknown> {
     const response = await API.post<unknown>(URLs.addCommentToRequest(request_id), {
-      body,
+      ...body,
     })
 
     return response.data

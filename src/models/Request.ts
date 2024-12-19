@@ -16,7 +16,7 @@ export interface RequestDto {
   user: User
   description: string
   status: string
-  comments: RequestComment
+  comments: RequestComment[]
   created_at: string
   updated_at: string
 }

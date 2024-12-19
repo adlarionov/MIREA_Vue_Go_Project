@@ -9,31 +9,14 @@ import MainFooter from './components/MainFooter.vue'
 import type { Request } from '@/models/Request'
 import { onMounted, ref, useTemplateRef } from 'vue'
 import RequestsController from '@/controllers/requestsController'
+import { AxiosError } from 'axios'
+import { useToast } from 'primevue'
+import EventsController from '@/controllers/eventsController'
 
 const inputForm = useTemplateRef<HTMLFormElement>('inputForm')
 
+const toast = useToast()
 const requests = ref<Request[]>([])
-
-// const requests: Request[] = [
-//   {
-//     id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-//     author: { login: 'Ярослав', id: 0, name: 'Ярослав', phone: '+797446465' },
-//     event: 'Highload++',
-//     created_at: '2024-12-18T20:40:24.063Z',
-//   },
-//   {
-//     id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-//     author: { login: 'Ярослав', id: 0, name: 'Ярослав', phone: '+797446465' },
-//     event: 'Highload++',
-//     created_at: '2024-12-18T20:40:24.063Z',
-//   },
-//   {
-//     id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-//     author: { login: 'Ярослав', id: 0, name: 'Ярослав', phone: '+797446465' },
-//     event: 'Highload++',
-//     created_at: '2024-12-18T20:40:24.063Z',
-//   },
-// ]
 
 interface FilterFormItems {
   event_name: string
@@ -45,26 +28,61 @@ const handleSearchRequests = async (event: MouseEvent) => {
   event.preventDefault()
   if (!inputForm.value) return
 
-  const filterForm = Array.from(inputForm.value.elements) as HTMLInputElement[]
+  try {
+    const filterForm = Array.from(inputForm.value.elements) as HTMLInputElement[]
 
-  const payload: FilterFormItems = {
-    event_name: filterForm[0].value,
-    author_login: filterForm[1].value,
-    created_after: new Date(filterForm[2].value).toISOString(),
+    const payload: FilterFormItems = {
+      event_name: filterForm[0].value,
+      author_login: filterForm[1].value,
+      created_after: new Date(filterForm[2].value).toISOString(),
+    }
+
+    console.log(payload)
+
+    let event_id = undefined
+    if (payload.event_name) {
+      const commonEvent = await EventsController.getEvents(payload.event_name)
+      event_id = commonEvent[0].event_id
+    }
+
+    requests.value = await RequestsController.getRequests(
+      undefined,
+      event_id,
+      payload.author_login,
+      payload.created_after,
+    )
+  } catch (e) {
+    if (e instanceof AxiosError) {
+      if (e.status === 404)
+        toast.add({
+          severity: 'info',
+          closable: false,
+          summary: 'Нет заявок по заданным фильтрам',
+          life: 1500,
+        })
+      else
+        toast.add({
+          severity: 'error',
+          closable: false,
+          summary: 'Ошибка при выводе заявок',
+          life: 3000,
+        })
+    }
+    return
   }
-
-  console.log(payload)
-
-  requests.value = await RequestsController.getRequests(
-    undefined,
-    payload.event_name,
-    payload.author_login,
-    payload.created_after,
-  )
 }
 
 onMounted(async () => {
-  requests.value = await RequestsController.getRequests()
+  try {
+    requests.value = await RequestsController.getRequests()
+  } catch {
+    toast.add({
+      severity: 'error',
+      closable: false,
+      summary: 'Ошибка при выводе заявок',
+      life: 3000,
+    })
+  }
 })
 </script>
 <template>

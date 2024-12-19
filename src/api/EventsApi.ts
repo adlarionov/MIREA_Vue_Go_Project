@@ -4,7 +4,7 @@ import URLs from './URLs'
 
 export default class EventsApi {
   static async createEvent(body: NewEvent): Promise<unknown> {
-    const response = await API.post<unknown>(URLs.createEvent, { body })
+    const response = await API.post<unknown>(URLs.createEvent, { ...body })
 
     return response.data
   }
@@ -29,7 +29,7 @@ export default class EventsApi {
 
   static async updateEventById(event_id: string, body: Partial<Event>): Promise<UpdatedEvent> {
     const response = await API.put<UpdatedEvent>(URLs.updateEventById(event_id), {
-      body,
+      ...body,
     })
 
     return response.data

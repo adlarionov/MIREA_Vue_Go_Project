@@ -13,29 +13,46 @@ import { parseFormResult } from '@/shared/parseFormResult'
 import type Attachment from '@/models/Attachment'
 import type { FileType } from '@/models/Attachment'
 import Header from '@/components/Header.vue'
+import { onMounted } from 'vue'
+import EventsController from '@/controllers/eventsController'
+import type { Event } from '@/models/Event'
+import { AxiosError } from 'axios'
+import { useRouter } from 'vue-router'
+import FilesController from '@/controllers/filesController'
 
 const toast = useToast()
+const router = useRouter()
 
 const fileInput = ref<Attachment[]>([])
+const selectOptions = ref<Event[]>([])
 const initialValues = reactive<Omit<NewRequest, 'attachments'>>({
   event_id: '',
   description: '',
   status: 'new',
 })
 
-const handleFileLoad = (e: FileUploadSelectEvent) => {
+const handleFileLoad = async (e: FileUploadSelectEvent) => {
   toast.add({
     severity: 'info',
     summary: 'Файл добавлен',
     life: 1400,
   })
 
-  const files = (e.files as FileType[]).map<Attachment>((file) => ({
-    filename: file.name,
-    id: file.objectURL.split('/').pop() ?? '',
-  }))
+  const files = e.files as FileType
 
-  fileInput.value = files
+  // const files = new Blob()
+  if (!files.size) {
+    fileInput.value = []
+    return
+  }
+
+  console.log(files)
+
+  const response = await FilesController.loadFile(files)
+
+  console.log(response)
+
+  // fileInput.value = e.files
 }
 
 const resolver = ({ values }: FormResolverOptions) => {
@@ -51,17 +68,35 @@ const resolver = ({ values }: FormResolverOptions) => {
 const onFormSubmit = ({ valid, states }: FormSubmitEvent) => {
   if (valid) {
     const result = parseFormResult<NewRequest>(states)
-    const files = fileInput.value
+    // const files = fileInput.value
 
-    console.log({ ...result, attachments: files })
+    console.log({ ...result })
 
     toast.add({
       severity: 'success',
-      summary: 'Заявка подана.',
+      summary: 'Заявка подана',
       life: 3000,
     })
   }
 }
+
+onMounted(async () => {
+  try {
+    const response = await EventsController.getEvents()
+
+    selectOptions.value = response
+  } catch (e) {
+    if (e instanceof AxiosError) {
+      toast.add({
+        severity: 'error',
+        closable: false,
+        summary: e.message,
+        life: 3000,
+      })
+    }
+    return
+  }
+})
 </script>
 <template>
   <Form
@@ -74,7 +109,14 @@ const onFormSubmit = ({ valid, states }: FormSubmitEvent) => {
     <Header back title="Новая заявка" />
     <div class="requests-new-input">
       <div class="requests-flex">
-        <Select :options="['test']" name="event_id" placeholder="Выберите мероприятие" />
+        <Select
+          :loading="!selectOptions.length"
+          :options="selectOptions"
+          optionLabel="name"
+          optionValue="id"
+          name="event_id"
+          placeholder="Выберите мероприятие"
+        />
         <Message v-if="$form.event_id?.invalid" severity="error" size="small" variant="simple">{{
           $form.event_id.error?.message
         }}</Message>
@@ -88,7 +130,7 @@ const onFormSubmit = ({ valid, states }: FormSubmitEvent) => {
     </div>
     <div class="requests-new-footer">
       <FileUpload auto multiple name="attachments" mode="basic" @select="handleFileLoad" />
-      <Button :disabled="!fileInput?.length" type="submit" label="Отправить" />
+      <Button type="submit" label="Отправить" />
     </div>
   </Form>
   <Toast />
