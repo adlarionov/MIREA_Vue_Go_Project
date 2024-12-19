@@ -19,21 +19,24 @@ const toast = useToast()
 const requests = ref<Request[]>([])
 
 interface FilterFormItems {
-  event_name: string
-  author_login: string
-  created_after: string
+  event_name?: string
+  author_login?: string
+  created_after?: string
 }
 
 const handleSearchRequests = async (event: MouseEvent) => {
   event.preventDefault()
+
+  console.log(inputForm.value)
+
   if (!inputForm.value) return
 
   try {
     const filterForm = Array.from(inputForm.value.elements) as HTMLInputElement[]
 
     const payload: FilterFormItems = {
-      event_name: filterForm[0].value,
-      author_login: filterForm[1].value,
+      event_name: filterForm[0] ? filterForm[0].value : undefined,
+      author_login: filterForm[1] ? filterForm[1].value : undefined,
       created_after: new Date(filterForm[2].value).toISOString(),
     }
 
