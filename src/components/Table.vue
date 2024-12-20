@@ -19,7 +19,6 @@ defineProps<{ requests: Request[] }>()
       </template>
     </Column>
     <Column field="author.name" header="Автор" />
-    <Column field="event.title" header="Мероприятие" />
     <Column field="created_at" header="Создана">
       <template #body="slotProps">
         <span>{{ parseDate(slotProps.data.created_at) }}</span>
