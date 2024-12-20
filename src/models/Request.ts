@@ -28,7 +28,7 @@ export interface NewRequestComment {
 export interface RequestComment {
   content: string
   author: User
-  created_id: string
+  created_at: string
 }
 
 export interface NewRequest {

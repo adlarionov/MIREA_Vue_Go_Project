@@ -24,12 +24,30 @@ import RequestsController from '@/controllers/requestsController'
 const toast = useToast()
 const router = useRouter()
 
-const fileInput = ref<Attachment[]>([])
+const fileInput = ref<Attachment | undefined>()
 const selectOptions = ref<Event[]>([])
 const initialValues = reactive<Omit<NewRequest, 'attachments'>>({
   event_id: '',
   description: '',
   status: 'new',
+})
+
+onMounted(async () => {
+  try {
+    const response = await EventsController.getEvents()
+
+    selectOptions.value = response
+  } catch (e) {
+    if (e instanceof AxiosError) {
+      toast.add({
+        severity: 'error',
+        closable: false,
+        summary: e.message,
+        life: 3000,
+      })
+    }
+    return
+  }
 })
 
 const handleFileLoad = async (e: FileUploadSelectEvent) => {
@@ -45,17 +63,18 @@ const handleFileLoad = async (e: FileUploadSelectEvent) => {
 
   // const files = new Blob()
   if (!files.length) {
-    fileInput.value = []
+    fileInput.value = undefined
     return
   }
 
-  return
+  const blob = new Blob([files[0]], { type: 'text/plain' })
 
-  // const response = await FilesController.loadFile()
+  const response = await FilesController.loadFile(blob)
 
-  // console.log(response)
-
-  // fileInput.value = e.files
+  fileInput.value = {
+    filename: files[0].name,
+    id: response.file_id,
+  }
 }
 
 const resolver = ({ values }: FormResolverOptions) => {
@@ -69,17 +88,16 @@ const resolver = ({ values }: FormResolverOptions) => {
 }
 
 const onFormSubmit = async ({ valid, states, reset }: FormSubmitEvent) => {
+  console.log('here')
   if (valid) {
     try {
       const result = parseFormResult<NewRequest>(states)
-      // const files = fileInput.value
-
-      console.log('!test')
+      const files = fileInput.value
 
       const response = await RequestsController.createRequest({
         ...result,
         status: 'new',
-        attachments: [],
+        attachments: files ? [files] : [],
       })
 
       if (response) {
@@ -103,24 +121,6 @@ const onFormSubmit = async ({ valid, states, reset }: FormSubmitEvent) => {
     }
   }
 }
-
-onMounted(async () => {
-  try {
-    const response = await EventsController.getEvents()
-
-    selectOptions.value = response
-  } catch (e) {
-    if (e instanceof AxiosError) {
-      toast.add({
-        severity: 'error',
-        closable: false,
-        summary: e.message,
-        life: 3000,
-      })
-    }
-    return
-  }
-})
 </script>
 <template>
   <Form
@@ -153,7 +153,7 @@ onMounted(async () => {
       </div>
     </div>
     <div class="requests-new-footer">
-      <FileUpload auto multiple name="attachments" mode="basic" @select="handleFileLoad" />
+      <FileUpload auto name="attachments" @select="handleFileLoad" />
       <Button type="submit" label="Отправить" />
     </div>
   </Form>

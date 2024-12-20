@@ -3,6 +3,7 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import type { Request } from '@/models/Request'
 import Caret from '@/assets/caret-right.svg'
+import parseDate from '@/shared/parseDate'
 
 defineProps<{ requests: Request[] }>()
 </script>
@@ -21,10 +22,7 @@ defineProps<{ requests: Request[] }>()
     <Column field="event.title" header="Мероприятие" />
     <Column field="created_at" header="Создана">
       <template #body="slotProps">
-        <span
-          >{{ new Date(slotProps.data.created_at).toLocaleDateString() }}
-          {{ new Date(slotProps.data.created_at).toLocaleTimeString() }}</span
-        >
+        <span>{{ parseDate(slotProps.data.created_at) }}</span>
       </template>
     </Column>
   </DataTable>

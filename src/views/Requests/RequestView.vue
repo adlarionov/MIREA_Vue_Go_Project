@@ -1,27 +1,25 @@
 <script setup lang="ts">
 import Textarea from 'primevue/textarea'
 import Header from '@/components/Header.vue'
-import { Button, Tag, useToast } from 'primevue'
+import { Button, InputText, Tag, useToast } from 'primevue'
 import File from '@/assets/file-icon.png'
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import RequestsController from '@/controllers/requestsController'
 import { useRoute, useRouter } from 'vue-router'
-import type { RequestDto } from '@/models/Request'
+import { type RequestComment, type RequestDto } from '@/models/Request'
 import { AxiosError } from 'axios'
+import parseDate from '@/shared/parseDate'
 
 const route = useRoute()
 const router = useRouter()
 
 const toast = useToast()
 
-const parseDate = (inputDate?: string) => {
-  if (!inputDate) return ''
-  return `${new Date(inputDate).toLocaleDateString()} ${new Date(inputDate).toLocaleTimeString()}`
-}
-
 const data = ref<RequestDto>()
+const newComment = defineModel({ default: '' })
+const loading = ref(false)
 
-onMounted(async () => {
+const requestInitData = async () => {
   try {
     if (!Array.isArray(route.params.request_id))
       data.value = await RequestsController.getRequestById(route.params.request_id)
@@ -34,10 +32,29 @@ onMounted(async () => {
     })
     router.push('/')
   }
-})
+}
 
 const handleAddNewComment = async () => {
   try {
+    loading.value = true
+    if (!Array.isArray(route.params.request_id)) {
+      await Promise.all([
+        RequestsController.addCommentToRequest(route.params.request_id, {
+          content: newComment.value,
+        }),
+        setTimeout(() => {
+          requestInitData()
+          loading.value = false
+        }, 3000),
+      ])
+
+      toast.add({
+        severity: 'success',
+        summary: 'Комментарий успешно добавлен',
+        life: 3000,
+      })
+      newComment.value = ''
+    }
   } catch (e) {
     if (e instanceof AxiosError) {
       toast.add({
@@ -50,6 +67,31 @@ const handleAddNewComment = async () => {
     return
   }
 }
+
+const getDataFromComments = (field: keyof RequestComment) => {
+  if (!data.value) return
+  if (!data.value.comments.length) return ''
+  const commentParsed = data.value.comments.sort(
+    (a, b) => Date.parse(b.created_at) - Date.parse(a.created_at),
+  )
+
+  switch (field) {
+    case 'content':
+      return commentParsed
+        .map((comm) => '- ' + comm.content + '\n')
+        .reduce((prev, curr) => prev + curr, '')
+    case 'author':
+      return commentParsed[0].author.name
+    case 'created_at':
+      return parseDate(commentParsed[0].created_at)
+    default:
+      return
+  }
+}
+
+onMounted(async () => {
+  await requestInitData()
+})
 </script>
 <template>
   <div>
@@ -59,7 +101,9 @@ const handleAddNewComment = async () => {
         <Textarea :value="data?.description" disabled style="resize: none" rows="8" />
         <div class="request-info-files-container">
           <div class="file" v-for="attachment in data?.attachments" :key="attachment.filename">
-            <img width="60" :src="File" :alt="File" />
+            <a :href="attachment.download_url" target="_blank">
+              <img width="60" :src="File" :alt="File" />
+            </a>
             <span>{{ attachment.filename }}</span>
           </div>
         </div>
@@ -90,12 +134,15 @@ const handleAddNewComment = async () => {
     </div>
     <div class="request-comments">
       <h3 class="request-comments-title">Комментарии</h3>
-      <Textarea :value="data?.comments.pop()?.content" rows="10" disabled style="resize: none" />
+      <Textarea :value="getDataFromComments('content')" rows="10" disabled style="resize: none" />
       <div class="request-comments-description">
-        <p>{{ parseDate(data?.comments.pop()?.created_id) }}</p>
-        <h4>{{ data?.comments.pop()?.author }}</h4>
-        <Button @click="handleAddNewComment" label="Новый комментарий" />
+        <p>{{ getDataFromComments('created_at') }}</p>
+        <h4>{{ getDataFromComments('author') }}</h4>
       </div>
+    </div>
+    <div class="request-comments-input">
+      <InputText style="width: 680px" v-model="newComment" />
+      <Button :loading @click="handleAddNewComment" label="Новый комментарий" />
     </div>
   </div>
 </template>
@@ -149,5 +196,12 @@ const handleAddNewComment = async () => {
   flex-direction: column;
   align-items: end;
   gap: 8px;
+  margin-bottom: 28px;
+}
+
+.request-comments-input {
+  display: flex;
+  justify-content: end;
+  gap: 16px;
 }
 </style>

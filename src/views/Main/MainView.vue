@@ -54,8 +54,6 @@ const handleSearchRequests = async (event: MouseEvent) => {
     )
 
     requests.value = response
-
-    console.log(response)
   } catch (e) {
     if (e instanceof AxiosError) {
       if (e.status === 404) {
@@ -81,8 +79,6 @@ const handleSearchRequests = async (event: MouseEvent) => {
 onMounted(async () => {
   try {
     const requestsResponse = await RequestsController.getRequests()
-    // requestsResponse.forEach(async (request) => await EventsController.getEventById(request.event);)
-    // const eventResponse =
     requests.value = requestsResponse
   } catch {
     toast.add({
