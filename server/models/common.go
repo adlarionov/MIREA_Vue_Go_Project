@@ -7,11 +7,16 @@ type DbInstance struct {
 }
 
 type DotEnv struct {
-	DB_HOST     string
-	DB_USER     string
-	DB_PASSWORD string
-	DB_NAME     string
-	DB_PORT     string
+	DB_HOST        string
+	DB_USER        string
+	DB_PASSWORD    string
+	DB_NAME        string
+	DB_PORT        string
+	APP_PORT       string
+	APP_JWT_SECRET string
 }
 
-var Env DotEnv
+type ApiErrorWrapper struct {
+	Message string `json:"message"`
+	Ok      bool   `json:"ok"`
+}

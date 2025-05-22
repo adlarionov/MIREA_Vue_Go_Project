@@ -4,26 +4,36 @@ import (
 	"fmt"
 	"log"
 
-	common "server/models"
+	constants "server/constants"
+	"server/models/entity"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
+var DB *gorm.DB
+
 func ConnectDb() *gorm.DB {
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-		common.Env.DB_HOST,
-		common.Env.DB_USER,
-		common.Env.DB_PASSWORD,
-		common.Env.DB_NAME,
-		common.Env.DB_PORT)
+		constants.Env.DB_HOST,
+		constants.Env.DB_USER,
+		constants.Env.DB_PASSWORD,
+		constants.Env.DB_NAME,
+		constants.Env.DB_PORT)
 
-	db, err := gorm.Open(postgres.Open(dsn))
+	var err error
+	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
 		log.Fatal("Error while connecting to Database!")
 	}
 
-	return db
+	migrateErr := DB.AutoMigrate(&entity.User{}, &entity.Event{})
+
+	if migrateErr != nil {
+		log.Fatal(migrateErr)
+	}
+
+	return DB
 }

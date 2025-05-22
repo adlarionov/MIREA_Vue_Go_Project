@@ -1,0 +1,309 @@
+basePath: /
+definitions:
+  dto.EventDto:
+    properties:
+      address:
+        type: string
+      capacity:
+        type: integer
+      city:
+        type: string
+      description:
+        type: string
+      price_per_hour:
+        type: number
+      title:
+        type: string
+    type: object
+  dto.EventRequestDto:
+    properties:
+      event:
+        $ref: '#/definitions/dto.EventDto'
+      owner:
+        type: string
+    type: object
+  dto.UserLoginDto:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  dto.UserRegisterDto:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+    type: object
+  dto.UserResponseDto:
+    properties:
+      token:
+        type: string
+    type: object
+  entity.Event:
+    properties:
+      address:
+        type: string
+      capacity:
+        type: integer
+      city:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      price_per_hour:
+        type: number
+      title:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  models.ApiErrorWrapper:
+    properties:
+      message:
+        type: string
+      ok:
+        type: boolean
+    type: object
+host: localhost:3000
+info:
+  contact:
+    email: fiber@swagger.io
+    name: API Support
+  description: Project by Anton Larionov for Events booking
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Events MIREA Project
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login with email and receive JWT Token
+      parameters:
+      - description: User email and password
+        in: body
+        name: UserCred
+        schema:
+          $ref: '#/definitions/dto.UserLoginDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ApiErrorWrapper'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ApiErrorWrapper'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiErrorWrapper'
+      summary: Login User
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create User by Email Name, Password
+      parameters:
+      - description: User email, password, role and full name
+        in: body
+        name: UserData
+        schema:
+          $ref: '#/definitions/dto.UserRegisterDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ApiErrorWrapper'
+      summary: Register User
+      tags:
+      - Auth
+  /events:
+    get:
+      consumes:
+      - application/json
+      description: Get All Events without ID
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Event'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiErrorWrapper'
+      summary: Get All Events
+      tags:
+      - Events
+    post:
+      consumes:
+      - application/json
+      description: Create Event by body params
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Event Data
+        in: body
+        name: Event
+        schema:
+          $ref: '#/definitions/dto.EventRequestDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ApiErrorWrapper'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiErrorWrapper'
+      summary: Create Event
+      tags:
+      - Events
+    put:
+      consumes:
+      - application/json
+      description: Edit Event by body params
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Event Edit Data
+        in: body
+        name: Event
+        schema:
+          $ref: '#/definitions/dto.EventRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ApiErrorWrapper'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiErrorWrapper'
+      summary: Edit Event
+      tags:
+      - Events
+  /events/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Event by id
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Event Id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ApiErrorWrapper'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiErrorWrapper'
+      summary: Delete Event
+      tags:
+      - Events
+    get:
+      consumes:
+      - application/json
+      description: Get Event by event id
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Event'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ApiErrorWrapper'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiErrorWrapper'
+      summary: Get Event
+      tags:
+      - Events
+swagger: "2.0"
