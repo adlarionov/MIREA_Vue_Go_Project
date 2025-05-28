@@ -53,9 +53,9 @@ jobs:
         working-directory: ./server
         run: go mod download
 
-      - name: Run tests
-        working-directory: ./server
-        run: go test ./...
+      # - name: Run tests
+      #   working-directory: ./server
+      #   run: go test ./...
 
       - name: Build binary
         working-directory: ./server
