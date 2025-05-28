@@ -64,4 +64,5 @@ jobs:
         run: go build -o mirea-events .
 
       - name: Build Docker image
+        working-directory: ./server
         run: docker build -t mirea-events .
