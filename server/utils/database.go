@@ -15,12 +15,11 @@ var DB *gorm.DB
 
 func ConnectDb() *gorm.DB {
 	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-		constants.Env.DB_HOST,
+		"postgres://%v:%v@%v:5432/%v?sslmode=disable",
 		constants.Env.DB_USER,
 		constants.Env.DB_PASSWORD,
-		constants.Env.DB_NAME,
-		constants.Env.DB_PORT)
+		constants.Env.DB_HOST,
+		constants.Env.DB_NAME)
 
 	var err error
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
