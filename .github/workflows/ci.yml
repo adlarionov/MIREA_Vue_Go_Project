@@ -2,7 +2,7 @@ name: CI/CD for Mirea Events
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
@@ -43,12 +43,15 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: Install dependencies
+        working-directory: ./server
         run: go mod download
 
       - name: Run tests
+        working-directory: ./server
         run: go test ./...
 
       - name: Build binary
+        working-directory: ./server
         run: go build -o mirea-events .
 
       - name: Build Docker image
