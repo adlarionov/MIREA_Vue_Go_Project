@@ -55,10 +55,6 @@ jobs:
           go mod tidy
           go mod download
 
-      # - name: Run tests
-      #   working-directory: ./server
-      #   run: go test ./...
-
       - name: Build binary
         working-directory: ./server
         run: go build -o mirea-events .

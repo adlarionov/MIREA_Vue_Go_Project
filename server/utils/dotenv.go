@@ -22,6 +22,5 @@ func InitDotEnv() {
 	constants.Env.DB_PASSWORD = os.Getenv("DB_PASSWORD")
 	constants.Env.DB_NAME = os.Getenv("DB_NAME")
 	// App params
-	constants.Env.APP_PORT = os.Getenv("APP_PORT")
 	constants.Env.APP_JWT_SECRET = os.Getenv("APP_JWT_SECRET")
 }

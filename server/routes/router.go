@@ -4,15 +4,25 @@ import (
 	"server/constants"
 	"server/middleware"
 	"server/services"
+	"server/utils"
 
 	_ "server/docs"
 
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/swagger"
 )
 
 func Router(app *fiber.App) {
+	// Logging To Log File
+	app.Use(logger.New(logger.Config{
+		Format:     "${pid} ${status} - ${method} ${path}\n",
+		TimeZone:   "Russia/Moscow",
+		Done:       utils.InitializeFiberLogger,
+		TimeFormat: "01.01.1970",
+	}))
+
 	auth := app.Group("/auth")
 	auth.Post("/register", services.Register)
 	auth.Post("/login", services.Login)
