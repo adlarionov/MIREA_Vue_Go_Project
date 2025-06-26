@@ -1,4 +1,4 @@
-# BMSTU UI
+# Mirea Vue Project ЭФМО-01-24
 
 ## X-Token
 
