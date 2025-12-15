@@ -9,7 +9,7 @@ const URLs = {
     author_login?: string,
     created_after?: string,
   ) => {
-    let url = '/requests?'
+    let url = '/events?'
     if (request_id) url += `request_id=${request_id}&`
     if (event_id) url += `event_id=${event_id}&`
     if (author_login) url += `&author_login=${author_login}&`

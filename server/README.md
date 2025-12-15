@@ -22,6 +22,29 @@ go mod tidy
 air
 ```
 
+### Сервисы
+
+**Auth**
+
+Для работы с защищенными роутами необходим токен, который генерируется по ручке /auth/login.
+
+```yml
+POST /auth/login  # Получение токена
+POST /auth/register # Регистрация
+```
+
+**Events**
+
+Создание, обновление, удаление, получение событий.
+
+```yml
+GET /events
+GET /events/{id}
+POST /events # Обязательное поле OwnerEmail
+PUT /events/{id}
+DELETE /events/{id}
+```
+
 ### Docker
 
 Запуск контейнера с зависимостями:
