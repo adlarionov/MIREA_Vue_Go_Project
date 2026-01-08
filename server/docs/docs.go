@@ -35,14 +35,14 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Login User",
+                "summary": "Login Organization",
                 "parameters": [
                     {
-                        "description": "User email and password",
-                        "name": "UserCred",
+                        "description": "Organization email and password",
+                        "name": "OrganizationCred",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/dto.UserLoginDto"
+                            "$ref": "#/definitions/dto.LoginRequestDto"
                         }
                     }
                 ],
@@ -50,7 +50,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.UserResponseDto"
+                            "$ref": "#/definitions/dto.LoginResponseDto"
                         }
                     },
                     "400": {
@@ -76,7 +76,7 @@ const docTemplate = `{
         },
         "/auth/register": {
             "post": {
-                "description": "Create User by Email Name, Password",
+                "description": "Create Organization by Email, Password",
                 "consumes": [
                     "application/json"
                 ],
@@ -86,14 +86,14 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Register User",
+                "summary": "Register Organization",
                 "parameters": [
                     {
-                        "description": "User email, password, role and full name",
-                        "name": "UserData",
+                        "description": "Organization email, password, name of company",
+                        "name": "OrganizationData",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/dto.UserRegisterDto"
+                            "$ref": "#/definitions/dto.RegisterRequestDto"
                         }
                     }
                 ],
@@ -106,6 +106,151 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiErrorWrapper"
+                        }
+                    }
+                }
+            }
+        },
+        "/bookings": {
+            "get": {
+                "description": "Get All Bookings without ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "Get All Bookings",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Booking"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiErrorWrapper"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create Booking by body params",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "Create Booking",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Booking Data",
+                        "name": "Booking",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/entity.BookingRequestDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiErrorWrapper"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiErrorWrapper"
+                        }
+                    }
+                }
+            }
+        },
+        "/bookings/{id}": {
+            "get": {
+                "description": "Get Booking by booking id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "Get Booking",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Booking ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.Booking"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiErrorWrapper"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/models.ApiErrorWrapper"
                         }
@@ -129,6 +274,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "default": "Bearer",
                         "description": "Bearer Token",
                         "name": "Authorization",
                         "in": "header",
@@ -141,58 +287,8 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/entity.Event"
+                                "$ref": "#/definitions/entity.EventResponseDto"
                             }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.ApiErrorWrapper"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Edit Event by body params",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Events"
-                ],
-                "summary": "Edit Event",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Bearer Token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "description": "Event Edit Data",
-                        "name": "Event",
-                        "in": "body",
-                        "schema": {
-                            "$ref": "#/definitions/dto.EventRequestDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/models.ApiErrorWrapper"
                         }
                     },
                     "500": {
@@ -218,6 +314,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "default": "Bearer",
                         "description": "Bearer Token",
                         "name": "Authorization",
                         "in": "header",
@@ -270,6 +367,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "default": "Bearer",
                         "description": "Bearer Token",
                         "name": "Authorization",
                         "in": "header",
@@ -319,6 +417,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "default": "Bearer",
                         "description": "Bearer Token",
                         "name": "Authorization",
                         "in": "header",
@@ -353,28 +452,222 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/venues": {
+            "get": {
+                "description": "Get All venues without ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Venues"
+                ],
+                "summary": "Get All Venues",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Venue"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiErrorWrapper"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create Venue by venue id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Venues"
+                ],
+                "summary": "Create Venue",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Venue Data",
+                        "name": "Venue",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/dto.VenueRequestDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiErrorWrapper"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiErrorWrapper"
+                        }
+                    }
+                }
+            }
+        },
+        "/venues/{id}": {
+            "get": {
+                "description": "Get Venue by venue id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Venues"
+                ],
+                "summary": "Get Venue",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Venue ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.Venue"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiErrorWrapper"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiErrorWrapper"
+                        }
+                    }
+                }
+            }
+        },
+        "/venues/{id}/images": {
+            "post": {
+                "description": "Add Image to Venue by venue id",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Venues"
+                ],
+                "summary": "Add Image to Venue",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Image to Venue",
+                        "name": "Image",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Venue ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.Image"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiErrorWrapper"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiErrorWrapper"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
         "dto.EventDto": {
             "type": "object",
             "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "capacity": {
-                    "type": "integer"
-                },
-                "city": {
-                    "type": "string"
-                },
                 "description": {
                     "type": "string"
                 },
-                "price_per_hour": {
-                    "type": "number"
-                },
-                "title": {
+                "name": {
                     "type": "string"
                 }
             }
@@ -384,13 +677,10 @@ const docTemplate = `{
             "properties": {
                 "event": {
                     "$ref": "#/definitions/dto.EventDto"
-                },
-                "owner": {
-                    "type": "string"
                 }
             }
         },
-        "dto.UserLoginDto": {
+        "dto.LoginRequestDto": {
             "type": "object",
             "properties": {
                 "email": {
@@ -401,7 +691,15 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UserRegisterDto": {
+        "dto.LoginResponseDto": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.RegisterRequestDto": {
             "type": "object",
             "properties": {
                 "email": {
@@ -413,20 +711,12 @@ const docTemplate = `{
                 "password": {
                     "type": "string"
                 },
-                "role": {
-                    "type": "string"
+                "phone": {
+                    "type": "integer"
                 }
             }
         },
-        "dto.UserResponseDto": {
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string"
-                }
-            }
-        },
-        "entity.Event": {
+        "dto.VenueDto": {
             "type": "object",
             "properties": {
                 "address": {
@@ -435,8 +725,162 @@ const docTemplate = `{
                 "capacity": {
                     "type": "integer"
                 },
-                "city": {
+                "description": {
                     "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.VenueRequestDto": {
+            "type": "object",
+            "properties": {
+                "venue": {
+                    "$ref": "#/definitions/dto.VenueDto"
+                }
+            }
+        },
+        "entity.Booking": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "event": {
+                    "$ref": "#/definitions/entity.Event"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "venue": {
+                    "$ref": "#/definitions/entity.Venue"
+                }
+            }
+        },
+        "entity.BookingRequestDto": {
+            "type": "object",
+            "properties": {
+                "eventId": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "venueId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.Event": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "organization": {
+                    "$ref": "#/definitions/entity.Organization"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.EventResponseDto": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "organization": {
+                    "$ref": "#/definitions/entity.Organization"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.Image": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.Organization": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.Venue": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "capacity": {
+                    "type": "integer"
                 },
                 "created_at": {
                     "type": "string"
@@ -447,17 +891,14 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "price_per_hour": {
-                    "type": "number"
+                "image": {
+                    "$ref": "#/definitions/entity.Image"
                 },
-                "title": {
+                "name": {
                     "type": "string"
                 },
                 "updated_at": {
                     "type": "string"
-                },
-                "user_id": {
-                    "type": "integer"
                 }
             }
         },

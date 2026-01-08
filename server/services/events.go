@@ -1,11 +1,11 @@
 package services
 
 import (
+	"server/constants"
 	"server/models/dto"
 	"server/models/entity"
 	"server/utils"
 	"strconv"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -17,8 +17,8 @@ import (
 //	@Tags			Events
 //	@Accept			json
 //	@Produce		json
-//	@Param			Authorization	header		string	true	"Bearer Token"
-//	@Success		200				{object}	[]entity.Event
+//	@Param			Authorization	header		string	true	"Bearer Token"	default(Bearer )
+//	@Success		200				{object}	[]entity.EventResponseDto
 //	@Failure		500				{object}	models.ApiErrorWrapper
 //	@Router			/events [get]
 func GetEvents(c *fiber.Ctx) error {
@@ -26,7 +26,7 @@ func GetEvents(c *fiber.Ctx) error {
 
 	events := []entity.Event{}
 
-	if database.Find(&events).Error != nil {
+	if database.Model(&entity.Event{}).Preload("Organization").Find(&events).Error != nil {
 		return c.Status(500).JSON(fiber.Map{"message": "Error while finding events in DB", "ok": false})
 	}
 
@@ -40,7 +40,7 @@ func GetEvents(c *fiber.Ctx) error {
 //	@Tags			Events
 //	@Accept			json
 //	@Produce		json
-//	@Param			Authorization	header		string	true	"Bearer Token"
+//	@Param			Authorization	header		string	true	"Bearer Token"	default(Bearer )
 //	@Param			id				path		int		true	"Event ID"
 //	@Success		200				{object}	entity.Event
 //	@Failure		500				{object}	models.ApiErrorWrapper
@@ -51,19 +51,17 @@ func GetEventById(c *fiber.Ctx) error {
 
 	event := entity.Event{}
 
-	idParam := c.Params("id")
+	eventId, eventIdError := c.ParamsInt("id")
 
-	eventId, convError := strconv.Atoi(idParam)
-
-	if convError != nil {
-		return c.Status(500).JSON(fiber.Map{"message": "", "ok": false})
+	if eventIdError != nil {
+		return c.Status(500).JSON(fiber.Map{"message": eventIdError, "ok": false})
 	}
 
-	if database.Find(&event, eventId).Error != nil {
+	if database.Model(&entity.Event{}).Preload("Organization").Find(&event, eventId).Error != nil {
 		return c.Status(500).JSON(fiber.Map{"message": "Error while finding events in DB", "ok": false})
 	}
 
-	if eventId != int(event.EventId) {
+	if eventId != int(event.ID) {
 		return c.Status(404).JSON(fiber.Map{"message": "Event not found", "ok": true})
 	}
 
@@ -77,7 +75,7 @@ func GetEventById(c *fiber.Ctx) error {
 //	@Tags			Events
 //	@Accept			json
 //	@Produce		json
-//	@Param			Authorization	header		string				true	"Bearer Token"
+//	@Param			Authorization	header		string				true	"Bearer Token"	default(Bearer )
 //	@Param			Event			body		dto.EventRequestDto	false	"Event Data"
 //	@Success		201				{string}	string
 //	@Failure		500				{object}	models.ApiErrorWrapper
@@ -92,17 +90,11 @@ func CreateEvent(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"message": "Wrong body parameters", "ok": false})
 	}
 
-	user, userErr := FindUserByEmail(event.OwnerEmail)
-
-	if userErr != nil {
-		return c.Status(404).JSON(fiber.Map{"message": "User not found", "ok": true})
-	}
+	organizationID := c.Locals(constants.OrganizationIDKey).(uint)
 
 	newEvent := entity.Event{
-		OwnerId:   user.UserId,
-		EventDto:  event.Event,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		EventDto:       event.Event,
+		OrganizationId: organizationID,
 	}
 
 	if database.Create(&newEvent).Error != nil {
@@ -112,44 +104,6 @@ func CreateEvent(c *fiber.Ctx) error {
 	return c.Status(201).SendString("Event has been succesfully created!")
 }
 
-// Edit Event
-//
-//	@Summary		Edit Event
-//	@Description	Edit Event by body params
-//	@Tags			Events
-//	@Accept			json
-//	@Produce		json
-//	@Param			Authorization	header		string				true	"Bearer Token"
-//	@Param			Event			body		dto.EventRequestDto	false	"Event Edit Data"
-//	@Success		200				{string}	string
-//	@Failure		500				{object}	models.ApiErrorWrapper
-//	@Failure		404				{object}	models.ApiErrorWrapper
-//	@Router			/events [put]
-func EditEvent(c *fiber.Ctx) error {
-	database := utils.DB
-
-	event := dto.EventRequestDto{}
-
-	if c.BodyParser(&event) != nil {
-		return c.Status(500).JSON(fiber.Map{"message": "Wrong body parameters", "ok": false})
-	}
-
-	eventToEdit := entity.Event{}
-
-	if database.First(&eventToEdit, "Title = ?", event.Event.Title).Error != nil {
-		return c.Status(404).JSON(fiber.Map{"message": "No such event in DB", "ok": true})
-	}
-
-	if database.Save(&entity.Event{
-		EventId:  eventToEdit.EventId,
-		EventDto: event.Event,
-	}).Error != nil {
-		return c.Status(500).JSON(fiber.Map{"message": "Error while updating event in DB", "ok": false})
-	}
-
-	return c.Status(200).SendString("Event successfully updated!")
-}
-
 // Delete Event By Id
 //
 //	@Summary		Delete Event
@@ -157,7 +111,7 @@ func EditEvent(c *fiber.Ctx) error {
 //	@Tags			Events
 //	@Accept			json
 //	@Produce		json
-//	@Param			Authorization	header		string	true	"Bearer Token"
+//	@Param			Authorization	header		string	true	"Bearer Token"	default(Bearer )
 //	@Param			id				path		int		true	"Event Id"
 //	@Success		200				{string}	string
 //	@Failure		500				{object}	models.ApiErrorWrapper

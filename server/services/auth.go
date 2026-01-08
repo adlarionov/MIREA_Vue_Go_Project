@@ -9,92 +9,93 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func FindUserByEmail(email string) (*entity.User, error) {
+func FindOrganizationByEmail(email string) (*entity.Organization, error) {
 	database := utils.DB
 
-	var foundUser entity.User
+	var foundOrganization entity.Organization
 
-	if isError := database.First(&foundUser, "email = ?", email).Error; isError != nil {
+	if isError := database.First(&foundOrganization, "email = ?", email).Error; isError != nil {
 		return nil, isError
 	}
 
-	return &foundUser, nil
+	return &foundOrganization, nil
 }
 
-func checkUserPassword(userLoginDto *dto.UserLoginDto) bool {
-	foundUser, _ := FindUserByEmail(userLoginDto.Email)
+func checkPassword(loginRequestDto *dto.LoginRequestDto) bool {
+	foundOrganization, _ := FindOrganizationByEmail(loginRequestDto.Email)
 
-	return middleware.CheckHashPassword(userLoginDto.Password, foundUser.PasswordHash)
+	return middleware.CheckHashPassword(loginRequestDto.Password, foundOrganization.PasswordHash)
 }
 
 // Register Account Swagger Doc
 //
-//	@Summary		Register User
-//	@Description	Create User by Email Name, Password
+//	@Summary		Register Organization
+//	@Description	Create Organization by Email, Password
 //	@Tags			Auth
 //	@Accept			json
 //	@Produce		json
-//	@Param			UserData	body		dto.UserRegisterDto	false	"User email, password, role and full name"
-//	@Success		201			{string}	string
-//	@Failure		400			{object}	models.ApiErrorWrapper
+//	@Param			OrganizationData	body		dto.RegisterRequestDto	false	"Organization email, password, name of company"
+//	@Success		201					{string}	string
+//	@Failure		400					{object}	models.ApiErrorWrapper
 //	@Router			/auth/register [post]
 func Register(c *fiber.Ctx) error {
 	database := utils.DB
 
-	userDto := dto.UserRegisterDto{}
+	authDto := dto.RegisterRequestDto{}
 
-	if err := c.BodyParser(&userDto); err != nil {
+	if err := c.BodyParser(&authDto); err != nil {
 		return c.Status(400).JSON(fiber.Map{"message": "Bad Request", "ok": false})
 	}
 
-	hashedPassword, errorHash := middleware.HashPassword((&userDto).PasswordHash)
+	hashedPassword, errorHash := middleware.HashPassword((&authDto).PasswordHash)
+
 	if errorHash != nil {
 		return c.Status(400).JSON(fiber.Map{"message": "error while creating password", "ok": false})
 	}
 
-	userDto.PasswordHash = hashedPassword
+	authDto.PasswordHash = hashedPassword
 
-	if _, userError := FindUserByEmail((&userDto).Email); userError == nil {
+	if _, authError := FindOrganizationByEmail((&authDto).Email); authError == nil {
 
-		return c.Status(400).JSON(fiber.Map{"message": "User already registered", "ok": true})
+		return c.Status(400).JSON(fiber.Map{"message": "Organization already registered", "ok": true})
 	}
 
-	database.Create(&entity.User{
-		UserRegisterDto: userDto,
+	database.Create(&entity.Organization{
+		RegisterRequestDto: authDto,
 	})
 
-	return c.Status(201).SendString("User successfully registered!")
+	return c.Status(201).SendString("Organization successfully registered!")
 }
 
-// Login user with jwt token
+// Login organization with jwt token
 //
-//	@Summary		Login User
+//	@Summary		Login Organization
 //	@Description	Login with email and receive JWT Token
 //	@Tags			Auth
 //	@Accept			json
 //	@Produce		json
-//	@Param			UserCred	body		dto.UserLoginDto	false	"User email and password"
-//	@Success		200			{object}	dto.UserResponseDto
-//	@Failure		400			{object}	models.ApiErrorWrapper
-//	@Failure		404			{object}	models.ApiErrorWrapper
-//	@Failure		500			{object}	models.ApiErrorWrapper
+//	@Param			OrganizationCred	body		dto.LoginRequestDto	false	"Organization email and password"
+//	@Success		200					{object}	dto.LoginResponseDto
+//	@Failure		400					{object}	models.ApiErrorWrapper
+//	@Failure		404					{object}	models.ApiErrorWrapper
+//	@Failure		500					{object}	models.ApiErrorWrapper
 //	@Router			/auth/login [post]
 func Login(c *fiber.Ctx) error {
-	userLogin := dto.UserLoginDto{}
+	login := dto.LoginRequestDto{}
 
-	if err := c.BodyParser(&userLogin); err != nil {
+	if err := c.BodyParser(&login); err != nil {
 		return c.Status(400).JSON(fiber.Map{"message": "Bad Request", "ok": false})
 	}
 
-	if _, userError := FindUserByEmail((&userLogin).Email); userError != nil {
+	if _, userError := FindOrganizationByEmail(login.Email); userError != nil {
 		return c.Status(404).JSON(fiber.Map{"message": "This user is not registered", "ok": true})
 	}
 
-	if isCorrectPassword := checkUserPassword(&userLogin); !isCorrectPassword {
+	if !checkPassword(&login) {
 		return c.Status(400).JSON(fiber.Map{"message": "Wrong Password!", "ok": true})
 	}
 
-	token, tokenErr := middleware.CreateToken(userLogin)
+	token, tokenErr := middleware.CreateToken(login)
 
 	if tokenErr != nil {
 		return c.Status(500).JSON(fiber.Map{"message": "Token generation error", "ok": false})

@@ -23,6 +23,8 @@ func Router(app *fiber.App) {
 		TimeFormat: "01.01.1970",
 	}))
 
+	app.Static("/static", "./static")
+
 	auth := app.Group("/auth")
 	auth.Post("/register", services.Register)
 	auth.Post("/login", services.Login)
@@ -39,6 +41,14 @@ func Router(app *fiber.App) {
 	protected.Get("/events", services.GetEvents)
 	protected.Get("/events/:id", services.GetEventById)
 	protected.Post("/events", services.CreateEvent)
-	protected.Put("/events", services.EditEvent)
 	protected.Delete("/events/:id", services.DeleteEventById)
+	// Venues
+	protected.Get("/venues", services.GetVenues)
+	protected.Get("/venues/:id", services.GetVenueById)
+	protected.Post("/venues", services.CreateVenue)
+	protected.Post("/venues/:id/images", services.AddImageToVenueById)
+	// Bookings
+	protected.Get("/bookings", services.GetBookings)
+	protected.Get("/bookings/:id", services.GetBookingById)
+	protected.Post("/bookings", services.CreateBooking)
 }

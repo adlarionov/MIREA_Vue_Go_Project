@@ -1,6 +1,10 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"server/models/entity"
+
+	"gorm.io/gorm"
+)
 
 type DbInstance struct {
 	DB *gorm.DB
@@ -17,4 +21,14 @@ type DotEnv struct {
 type ApiErrorWrapper struct {
 	Message string `json:"message"`
 	Ok      bool   `json:"ok"`
+}
+
+var Entities = []any{
+	&entity.Organization{},
+	&entity.Image{},
+
+	&entity.Venue{},
+	&entity.Event{},
+
+	&entity.Booking{},
 }

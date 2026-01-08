@@ -5,7 +5,7 @@ import (
 	"log"
 
 	constants "server/constants"
-	"server/models/entity"
+	"server/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -28,7 +28,7 @@ func ConnectDb() *gorm.DB {
 		log.Fatal("Error while connecting to Database!")
 	}
 
-	migrateErr := DB.AutoMigrate(&entity.User{}, &entity.Event{})
+	migrateErr := DB.AutoMigrate(models.Entities...)
 
 	if migrateErr != nil {
 		log.Fatal(migrateErr)
