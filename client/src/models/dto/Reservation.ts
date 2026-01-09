@@ -1,7 +1,7 @@
 import type Attachment from './Attachment'
 import type { AttachmentRequestDto } from './Attachment'
 import type { FormError } from '../Form'
-import type { User } from './User'
+import type { User } from './Auth'
 
 export interface Reservation {
   id: string

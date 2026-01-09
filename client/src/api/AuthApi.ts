@@ -1,20 +1,12 @@
+import API from '@/api/instance'
+import type { RegisterRequestDto, LoginRequestDto, LoginResponseDto } from '@/models/dto/Auth'
+
 export default class AuthApi {
-  static user = { username: '', password: '' }
-
-  static auth() {
-    const user = sessionStorage.getItem('user')
-    return user ? JSON.parse(user) : null
+  static async login(data: LoginRequestDto) {
+    API.post<LoginResponseDto, LoginResponseDto, LoginRequestDto>('/auth/login', data)
   }
 
-  static login(username: string, password: string) {
-    if (!this.auth()) {
-      this.user = { username, password }
-      sessionStorage.setItem('user', JSON.stringify({ username, password }))
-    }
-  }
-
-  static logout() {
-    this.user = { username: '', password: '' }
-    sessionStorage.removeItem('user')
+  static async register(data: RegisterRequestDto) {
+    API.post<string, string, RegisterRequestDto>('/auth/register', data)
   }
 }
