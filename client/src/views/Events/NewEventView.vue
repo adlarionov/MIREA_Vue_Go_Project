@@ -7,23 +7,16 @@ import { reactive } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { InputText, Toast } from 'primevue'
 import { parseFormResult } from '@/shared/parseFormResult'
-import type { NewEvent, NewEventError } from '@/models/dto/Event'
 import Header from '@/components/Header.vue'
-import EventsController from '@/controllers/eventsController'
 import { AxiosError } from 'axios'
 
-const toast = useToast()
-
-const initialValues = reactive<NewEvent>({
+const initialValues = reactive({
   description: '',
   name: '',
 })
 
 const resolver = ({ values }: FormResolverOptions) => {
-  const errors: NewEventError = {}
-
-  if (!values.name) errors.name = [{ message: 'Мероприятие не названо' }]
-  if (!values.description) errors.description = [{ message: 'Мероприятие без описания' }]
+  const errors = {}
 
   return {
     errors,
@@ -32,30 +25,6 @@ const resolver = ({ values }: FormResolverOptions) => {
 
 const onFormSubmit = async ({ valid, states, reset }: FormSubmitEvent) => {
   if (valid) {
-    const values = parseFormResult<NewEvent>(states)
-
-    try {
-      const response = await EventsController.createEvent(values)
-
-      if (response)
-        toast.add({
-          severity: 'success',
-          summary: 'Мероприятие успешно создано',
-          life: 3000,
-        })
-
-      reset()
-    } catch (e) {
-      if (e instanceof AxiosError) {
-        toast.add({
-          severity: 'error',
-          life: 3000,
-          summary: e.message,
-          closable: false,
-        })
-      }
-      return
-    }
   }
 }
 </script>

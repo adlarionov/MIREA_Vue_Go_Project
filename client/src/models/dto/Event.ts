@@ -1,18 +1,10 @@
-import type { FormError } from '../Form'
+import type { ApiModelDto } from '@/models/Api'
+import type { OrganizationResponseDto } from '@/models/dto/Organization'
 
-export interface Event {
-  id: string
+export interface EventResponseDto extends ApiModelDto {
   name: string
   description: string
+  Organization: OrganizationResponseDto
 }
 
-export type NewEvent = Omit<Event, 'event_id'>
-
-export interface UpdatedEvent {
-  event_id: string
-}
-
-export type NewEventError = {
-  name?: FormError[]
-  description?: FormError[]
-}
+export type EventRequestDto = Pick<EventResponseDto, 'name' | 'description'>

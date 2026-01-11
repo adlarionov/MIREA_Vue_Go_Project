@@ -1,15 +1,12 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { RouterView, useRouter } from 'vue-router'
-import AuthApi from './api/AuthApi'
+import { RouterView } from 'vue-router'
 import { Toast } from 'primevue'
+import { provide } from 'vue'
+import { TOKEN_PROVIDE_KEY, TokenMiddleware } from '@/api/instance'
 
-const router = useRouter()
+const { clearToken, setToken } = TokenMiddleware()
 
-onMounted(() => {
-  const user = AuthApi.auth()
-  if (!user) router.push('/auth')
-})
+provide(TOKEN_PROVIDE_KEY, { setToken, clearToken })
 </script>
 
 <template>
@@ -21,6 +18,6 @@ onMounted(() => {
 
 <style scoped>
 .root {
-  padding: 60px 40px;
+  padding: 24px 16px;
 }
 </style>

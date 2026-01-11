@@ -14,7 +14,7 @@ import (
 func CreateToken(loginDto dto.LoginRequestDto) (dto.LoginResponseDto, error) {
 	encryptedToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": loginDto.Email,
-		"exp": time.Now().Add(time.Minute * 10).Unix(),
+		"exp": time.Now().Add(time.Minute * 30).Unix(),
 	})
 
 	token, tokenErr := encryptedToken.SignedString([]byte(constants.Env.APP_JWT_SECRET))

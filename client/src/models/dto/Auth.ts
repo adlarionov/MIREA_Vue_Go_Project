@@ -1,10 +1,3 @@
-export interface User {
-  id: number
-  name: string
-  login: string
-  phone: string
-}
-
 export interface LoginRequestDto {
   email: string
   password: string
