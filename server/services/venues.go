@@ -85,11 +85,13 @@ func CreateVenue(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"message": "Wrong body parameters", "ok": false})
 	}
 
-	if createError := database.Create(&entity.Venue{VenueDto: venueBody.Venue}).Error; createError != nil {
+	venueModel := &entity.Venue{VenueDto: venueBody.Venue}
+
+	if createError := database.Create(venueModel).Error; createError != nil {
 		return c.Status(500).JSON(fiber.Map{"message": fmt.Sprintf("Error while creating venue. %s", createError), "ok": false})
 	}
 
-	return c.Status(201).SendString("Successfully created venue!")
+	return c.Status(201).JSON(venueModel.ID)
 }
 
 // Add Image To Existing Venue

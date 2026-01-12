@@ -12,7 +12,6 @@ const API = axios.create({
 API.interceptors.response.use(
   (response) => response,
   (responseError: AxiosError) => {
-    console.log(responseError, 'error')
     if (responseError.status === 401 || responseError.status === 400) {
       router.push('/auth')
       API.interceptors.request.clear()

@@ -8,3 +8,8 @@ export interface EventResponseDto extends ApiModelDto {
 }
 
 export type EventRequestDto = Pick<EventResponseDto, 'name' | 'description'>
+
+export interface EventTableItem extends Pick<EventResponseDto, 'name' | 'id' | 'description'> {
+  organizationName: OrganizationResponseDto['name']
+  organizationPhone: OrganizationResponseDto['phone']
+}

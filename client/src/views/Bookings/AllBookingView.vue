@@ -1,18 +1,19 @@
 <script setup lang="ts">
 import Table from '@/components/Table.vue'
 import Button from 'primevue/button'
-import type { BookingResponseDto } from '@/models/dto/Booking'
+import type { BookingTableItem } from '@/models/dto/Booking'
 import { bookingTableSchema } from '@/models/ui/Table'
 import { BookingService } from '@/services/BookingService'
 import { onMounted, ref } from 'vue'
 import router from '@/router'
+import { flatBookingSchema } from '@/views/Bookings/utils/tableSchemaBuilder'
 
-const data = ref<BookingResponseDto[]>([])
+const data = ref<BookingTableItem[]>([])
 
 const requestInitData = async () => {
   const bookings = await BookingService.getBookings()
 
-  data.value = bookings
+  if (bookings && bookings.length > 0) data.value = flatBookingSchema(bookings)
 }
 
 onMounted(() => requestInitData())

@@ -13,3 +13,8 @@ export type VenueRequestDto = Pick<
   VenueResponseDto,
   'address' | 'capacity' | 'description' | 'name'
 >
+
+export interface VenueTableItem
+  extends Pick<VenueResponseDto, 'address' | 'id' | 'description' | 'name' | 'capacity'> {
+  imageUrl: ImageResponseDto['image_url']
+}

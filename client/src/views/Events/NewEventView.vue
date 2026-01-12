@@ -1,86 +1,50 @@
 <script setup lang="ts">
-import Textarea from 'primevue/textarea'
-import Button from 'primevue/button'
-import Message from 'primevue/message'
-import { Form, type FormResolverOptions, type FormSubmitEvent } from '@primevue/forms'
 import { reactive } from 'vue'
-import { useToast } from 'primevue/usetoast'
-import { InputText, Toast } from 'primevue'
-import { parseFormResult } from '@/shared/parseFormResult'
-import Header from '@/components/Header.vue'
-import { AxiosError } from 'axios'
+import Button from 'primevue/button'
+import { Form, type FormResolverOptions, type FormSubmitEvent } from '@primevue/forms'
+import { InputText, Textarea } from 'primevue'
+import type { EventRequestDto } from '@/models/dto/Event'
+import { EventService } from '@/services/EventService'
 
-const initialValues = reactive({
+const initialValues = reactive<Partial<EventRequestDto>>({
   description: '',
   name: '',
 })
 
 const resolver = ({ values }: FormResolverOptions) => {
-  const errors = {}
-
-  return {
-    errors,
-  }
+  return { values }
 }
 
-const onFormSubmit = async ({ valid, states, reset }: FormSubmitEvent) => {
-  if (valid) {
-  }
+const handleCreateEvent = async ({ values }: FormSubmitEvent) => {
+  EventService.createEvent(values as EventRequestDto)
+
+  return values
 }
 </script>
+
 <template>
-  <Form v-slot="$form" :initialValues :resolver class="events-new-container" @submit="onFormSubmit">
-    <Header back title="Новое мероприятие" />
-    <div class="event-new-input">
-      <div class="event-flex">
-        <InputText name="name" placeholder="Название" />
-        <Message v-if="$form.name?.invalid" severity="error" size="small" variant="simple">{{
-          $form.name.error?.message
-        }}</Message>
-      </div>
-      <div class="event-flex">
-        <Textarea name="description" placeholder="Описание" style="resize: none" rows="12" />
-        <Message v-if="$form.description?.invalid" severity="error" size="small" variant="simple">{{
-          $form.description.error?.message
-        }}</Message>
-      </div>
-    </div>
-    <div class="event-new-footer">
-      <Button type="submit" label="Добавить" />
-    </div>
-  </Form>
-  <Toast />
+  <div class="form-wrapper">
+    <h1>Создать событие</h1>
+    <Form class="form" @submit="handleCreateEvent" :initialValues :resolver form>
+      <InputText name="name" placeholder="Введите название события" />
+      <Textarea name="description" placeholder="Введите описание события" width="100%" autoResize />
+      <Button type="submit" label="Отправить" style="width: 120px" />
+    </Form>
+  </div>
 </template>
 
 <style scoped>
-.event-new-container {
+.form-wrapper {
+  margin-top: 56px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-}
-.event-new-title {
-  text-align: center;
-  width: 100%;
-}
-
-.event-flex {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-.event-new-input {
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  gap: 36px;
-  margin-bottom: 24px;
-}
-
-.event-new-footer {
-  display: flex;
-  gap: 16px;
-  justify-content: end;
   align-items: center;
+  gap: 24px;
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 80vw;
 }
 </style>

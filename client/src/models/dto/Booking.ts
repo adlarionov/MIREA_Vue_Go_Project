@@ -5,11 +5,17 @@ import type { VenueResponseDto } from '@/models/dto/Venue'
 export interface BookingResponseDto extends ApiModelDto {
   price: number
   status: string
-  event: EventResponseDto
-  venue: VenueResponseDto
+  Event: EventResponseDto
+  Venue: VenueResponseDto
 }
 
 export interface BookingRequestDto extends Omit<BookingResponseDto, 'event' | 'venue'> {
-  event_id: number
-  venue_id: number
+  eventId: number
+  venueId: number
+}
+
+export interface BookingTableItem extends Pick<BookingResponseDto, 'id' | 'price' | 'status'> {
+  eventName: EventResponseDto['name']
+  eventDescription: EventResponseDto['description']
+  venueName: VenueResponseDto['name']
 }

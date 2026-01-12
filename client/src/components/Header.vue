@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import BackButton from '@/components/BackButton.vue'
 
-defineProps<{ back?: boolean; title: string }>()
+defineProps<{ back?: boolean; title: string; to: string }>()
 </script>
 <template>
   <header class="header">
-    <BackButton v-if="back" />
+    <BackButton v-if="back" :to="to" />
     <h1
       class="header-new-title"
       :style="{ marginLeft: !!$slots.buttons ? '210px' : 0, marginRight: back ? '30px' : 0 }"

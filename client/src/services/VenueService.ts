@@ -1,6 +1,7 @@
 import API from '@/api/instance'
 import URLs from '@/api/URLs'
 import type { VenueRequestDto, VenueResponseDto } from '@/models/dto/Venue'
+import type { AxiosRequestConfig } from 'axios'
 
 export class VenueService {
   static async getVenues() {
@@ -16,7 +17,10 @@ export class VenueService {
   }
 
   static async createVenue(data: VenueRequestDto) {
-    const response = await API.post(URLs.getVenues, data)
+    const response = await API.post<number, AxiosRequestConfig<number>, VenueRequestDto>(
+      URLs.getVenues,
+      data,
+    )
 
     return response.data
   }

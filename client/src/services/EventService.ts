@@ -16,7 +16,7 @@ export class EventService {
   }
 
   static async createEvent(data: EventRequestDto) {
-    const response = await API.post(URLs.getVenues, data)
+    const response = await API.post(URLs.getEvents, data)
 
     return response.data
   }

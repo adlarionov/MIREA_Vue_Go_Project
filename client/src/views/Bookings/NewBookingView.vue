@@ -13,8 +13,8 @@ import { getOptionsFromData } from '@/shared/getOptionsFromData'
 import { BookingService } from '@/services/BookingService'
 
 const initialValues = reactive<Partial<BookingRequestDto>>({
-  venue_id: 0,
-  event_id: 0,
+  venueId: 0,
+  eventId: 0,
   price: 0,
   status: 'active',
 })
@@ -53,7 +53,7 @@ const handleCreateBooking = async ({ values }: FormSubmitEvent) => {
     <h1>Создать заявку</h1>
     <Form class="form" @submit="handleCreateBooking" :initialValues :resolver form>
       <Select
-        name="event_id"
+        name="eventId"
         :options="availableEvents"
         optionLabel="label"
         optionValue="value"
@@ -61,7 +61,7 @@ const handleCreateBooking = async ({ values }: FormSubmitEvent) => {
       />
 
       <Select
-        name="venue_id"
+        name="venueId"
         :options="availableVenues"
         optionLabel="label"
         optionValue="value"
