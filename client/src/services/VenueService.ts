@@ -16,10 +16,10 @@ export class VenueService {
     return response.data
   }
 
-  static async createVenue(data: VenueRequestDto) {
+  static async createVenue(data: VenueRequestDto['venue']) {
     const response = await API.post<number, AxiosRequestConfig<number>, VenueRequestDto>(
       URLs.getVenues,
-      data,
+      { venue: data },
     )
 
     return response.data

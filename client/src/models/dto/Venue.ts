@@ -9,9 +9,9 @@ export interface VenueResponseDto extends ApiModelDto {
   Image: ImageResponseDto
 }
 
-export type VenueRequestDto = Pick<
-  VenueResponseDto,
-  'address' | 'capacity' | 'description' | 'name'
+export type VenueRequestDto = Record<
+  'venue',
+  Pick<VenueResponseDto, 'address' | 'capacity' | 'description' | 'name'>
 >
 
 export interface VenueTableItem

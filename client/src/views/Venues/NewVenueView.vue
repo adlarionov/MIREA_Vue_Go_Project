@@ -2,12 +2,11 @@
 import { reactive, ref } from 'vue'
 import Button from 'primevue/button'
 import { Form, type FormResolverOptions, type FormSubmitEvent } from '@primevue/forms'
-import { FileUpload, InputNumber, InputText, Textarea, type FileUploadUploadEvent } from 'primevue'
+import { FileUpload, InputNumber, InputText, Textarea, type FileUploadSelectEvent } from 'primevue'
 import { VenueService } from '@/services/VenueService'
 import type { VenueRequestDto } from '@/models/dto/Venue'
-import URLs, { API_CONTEXT } from '@/api/URLs'
 
-const initialValues = reactive<Partial<VenueRequestDto>>({
+const initialValues = reactive<Partial<VenueRequestDto['venue']>>({
   address: '',
   capacity: 0,
   description: '',
@@ -16,10 +15,17 @@ const initialValues = reactive<Partial<VenueRequestDto>>({
 
 const venueId = ref<number>()
 
-const fileupload = ref()
+const onFileSelect = async (event: FileUploadSelectEvent) => {
+  const file = event.files[0]
 
-const upload = () => {
-  fileupload.value.upload()
+  const formData = new FormData()
+  formData.append('Image', file)
+
+  console.log(formData)
+
+  if (venueId.value) {
+    await VenueService.addImageToVenue(venueId.value, formData)
+  }
 }
 
 const resolver = ({ values }: FormResolverOptions) => {
@@ -27,15 +33,11 @@ const resolver = ({ values }: FormResolverOptions) => {
 }
 
 const handleCreateVenue = async ({ values }: FormSubmitEvent) => {
-  const newVenueId = await VenueService.createVenue(values as VenueRequestDto)
+  const newVenueId = await VenueService.createVenue(values as VenueRequestDto['venue'])
 
   venueId.value = newVenueId
 
   return values
-}
-
-const onFileUpload = (event: FileUploadUploadEvent) => {
-  console.log(event)
 }
 </script>
 
@@ -44,24 +46,22 @@ const onFileUpload = (event: FileUploadUploadEvent) => {
     <h1>Создать локацию</h1>
     <Form class="form" @submit="handleCreateVenue" :initialValues :resolver form>
       <InputText name="name" placeholder="Название" />
-      <InputNumber name="price" placeholder="Введите максимальное кол-во людей" />
+      <InputNumber name="capacity" placeholder="Введите максимальное кол-во людей" />
       <InputText name="address" placeholder="Адрес" />
       <Textarea name="description" placeholder="Введите описание локации" width="100%" autoResize />
 
       <Button type="submit" label="Отправить" style="width: 120px" s />
     </Form>
-    <!-- <div v-if="Boolean(venueId)"> -->
-    <FileUpload
-      ref="fileupload"
-      mode="basic"
-      name="image"
-      :url="venueId ? `${API_CONTEXT}${URLs.addImageToVenueById(venueId)}` : ''"
-      accept="image/*"
-      :maxFileSize="1000000"
-      @upload="onFileUpload"
-    />
-    <Button label="Upload" @click="upload" severity="secondary" />
-    <!-- </div> -->
+    <div v-if="Boolean(venueId)">
+      <FileUpload
+        mode="basic"
+        name="image"
+        customUpload
+        accept="image/*"
+        :maxFileSize="1000000"
+        @select="onFileSelect"
+      />
+    </div>
   </div>
 </template>
 
